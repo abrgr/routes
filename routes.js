@@ -1,3 +1,5 @@
+var URL = require('url');
+
 var Routes = function() {
     this._routes = {};
 };
@@ -10,7 +12,7 @@ Routes.prototype.addRoute = function(name, url) {
     });
 };
 
-Routes.prototype.getRoute = function(name, values, qsParams) {
+Routes.prototype.getRoute = function(name, values, qsParams, hashParam) {
     var r = this._routes[name];
     if ( arguments.length === 1 ) {
         return r;
@@ -23,10 +25,10 @@ Routes.prototype.getRoute = function(name, values, qsParams) {
             return r.replace(':' + key, values[key]);
         }, r),
         andedQs = Object.keys(qsParams).map(function(k) { return encodeURIComponent(k) + '=' + encodeURIComponent(qsParams[k]); })
-                        .reduce(function(a, b) { return a + '&' + b; });
-        withQs = withValues + (withValues.indexOf('?') === -1 ? '?' : '') + andedQs;
+                        .reduce(function(a, b) { return a + '&' + b; }, ''),
+        qs = andedQs.length > 0 ? '?' + andedQs : '';
 
-    return withQs;
+    return URL.format({pathname: withValues, search: qs, hash: hashParam});
 };
 
 Routes.prototype.allForPrefix = function(prefix) {
@@ -46,7 +48,7 @@ Routes.prototype.allForPrefix = function(prefix) {
 
 Routes.prototype.exposeHelpers = function(app) {
     var self = this;
-    app.helpers({'linkTo': function(name) { return self[name]; }});
+    app.helpers({'linkTo': self.getRoute.bind(self)});
 };
 
 module.exports = new Routes();
