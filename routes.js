@@ -21,7 +21,7 @@ Routes.prototype.getRoute = function(name, values, qsParams, hashParam) {
     values = values || {};
     qsParams = qsParams || {};
 
-    var withValues = Object.keys(values).reduce(function(key, r) {
+    var withValues = Object.keys(values).reduce(function(r, key) {
             return r.replace(':' + key, values[key]);
         }, r),
         andedQs = Object.keys(qsParams).map(function(k) { return encodeURIComponent(k) + '=' + encodeURIComponent(qsParams[k]); })
